@@ -300,9 +300,9 @@
 
       <button class="btn" onclick="showScreen('screen-add')">🏗️ &nbsp;Add a feature</button>
       <button class="btn" onclick="doExplore()">🗺️ &nbsp;Explore your world</button>
-      <button class="btn" onclick="showScreen('screen-stats')">📊 &nbsp;View statistics</button>
+      <button class="btn" onclick="showStats()">📊 &nbsp;View statistics</button>
       <button class="btn" onclick="doPassTime()">⏳ &nbsp;Let time pass</button>
-      <button class="btn" onclick="showScreen('screen-history')">📜 &nbsp;View history</button>
+      <button class="btn" onclick="showHistory()">📜 &nbsp;View history</button>
       <button class="btn danger" onclick="doExit()">🚪 &nbsp;Exit</button>
     </div>
   </div>
@@ -648,14 +648,6 @@ function doExit() {
   showScreen('screen-farewell');
 }
 
-/* ══════════════════════════════════════════════════════════
-   WIRE UP NAVIGATION BUTTONS that need data refresh
-══════════════════════════════════════════════════════════ */
-document.querySelector('[onclick="showScreen(\'screen-stats\')"]')
-  .setAttribute('onclick', 'showStats()');
-
-document.querySelector('[onclick="showScreen(\'screen-history\')"]')
-  .setAttribute('onclick', 'showHistory()');
 </script>
 </body>
 </html>
