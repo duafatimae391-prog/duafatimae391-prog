@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌍 World Builder</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --accent:    #58a6ff;
+      --accent2:   #bc8cff;
+      --green:     #3fb950;
+      --yellow:    #d29922;
+      --red:       #f85149;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* ── Card / screen container ──────────────────────────── */
+    #app {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Typography ───────────────────────────────────────── */
+    h1 {
+      font-size: 1.6rem;
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-size: 1.15rem;
+      color: var(--accent2);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 16px 0;
+    }
+
+    /* ── Stat bar ─────────────────────────────────────────── */
+    .stat-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Progress bar (magic) ─────────────────────────────── */
+    .magic-bar-wrap {
+      background: var(--bg);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .magic-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #bc8cff, #58a6ff);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn:hover { background: #21262d; border-color: var(--accent); }
+    .btn:active { background: #30363d; }
+    .btn.primary {
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      border-color: var(--accent);
+      text-align: center;
+    }
+    .btn.primary:hover { background: #79c0ff; }
+    .btn.danger {
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .btn.danger:hover { background: #2a1515; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Form inputs ──────────────────────────────────────── */
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus { border-color: var(--accent); }
+
+    /* ── Feature grid ─────────────────────────────────────── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 420px) { .feature-grid { grid-template-columns: 1fr; } }
+
+    .feature-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .feature-card:hover { border-color: var(--accent); background: #161b22; }
+    .feature-card .feat-name { font-weight: 600; font-size: 0.9rem; }
+    .feature-card .feat-bonus { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Message / event box ──────────────────────────────── */
+    .msg-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .msg-box.success { border-color: var(--green); }
+    .msg-box.info    { border-color: var(--accent); }
+    .msg-box.warn    { border-color: var(--yellow); }
+
+    /* ── History log ──────────────────────────────────────── */
+    #history-list {
+      list-style: none;
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    #history-list::-webkit-scrollbar { width: 4px; }
+    #history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    #history-list li {
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+    }
+    #history-list li:last-child { border-bottom: none; }
+    #history-list li .log-idx { color: var(--accent); min-width: 28px; font-size: 0.78rem; }
+
+    /* ── Feature list in stats ────────────────────────────── */
+    .feat-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .feat-tag {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+    }
+
+    /* ── Welcome screen decorative title ─────────────────── */
+    .big-title {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #58a6ff 30%, #bc8cff 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── Farewell screen ──────────────────────────────────── */
+    .farewell-art {
+      font-size: 3rem;
+      text-align: center;
+      margin: 12px 0;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════════════ WELCOME SCREEN ══════════════════ -->
+  <div id="screen-welcome" class="screen active">
+    <div class="card">
+      <div class="big-title">🌍 World Builder</div>
+      <p class="subtitle">Create mountains, oceans, forests, cities and more!<br>Your imagination is the only limit.</p>
+      <hr class="divider">
+      <label for="inp-world">🌐 Name your world</label>
+      <input type="text" id="inp-world" placeholder="e.g. Eldoria" maxlength="50" />
+      <label for="inp-creator">👑 Your name (creator)</label>
+      <input type="text" id="inp-creator" placeholder="e.g. Dua" maxlength="50" />
+      <button class="btn primary" onclick="startGame()">✨ Create World</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ MAIN MENU ══════════════════════ -->
+  <div id="screen-menu" class="screen">
+    <div class="card">
+      <h2>🌍 <span id="hdr-name">My World</span></h2>
+      <div class="stat-bar">
+        <div class="stat">
+          <div class="stat-value" id="stat-age">0</div>
+          <div class="stat-label">⏳ Age (yrs)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-pop">0</div>
+          <div class="stat-label">👥 Population</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-magic">0</div>
+          <div class="stat-label">🔮 Magic</div>
+          <div class="magic-bar-wrap"><div class="magic-bar-fill" id="magic-bar" style="width:0%"></div></div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-feats">0</div>
+          <div class="stat-label">🗺️ Features</div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="showScreen('screen-add')">🏗️ &nbsp;Add a feature</button>
+      <button class="btn" onclick="doExplore()">🗺️ &nbsp;Explore your world</button>
+      <button class="btn" onclick="showScreen('screen-stats')">📊 &nbsp;View statistics</button>
+      <button class="btn" onclick="doPassTime()">⏳ &nbsp;Let time pass</button>
+      <button class="btn" onclick="showScreen('screen-history')">📜 &nbsp;View history</button>
+      <button class="btn danger" onclick="doExit()">🚪 &nbsp;Exit</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ ADD FEATURE ════════════════════ -->
+  <div id="screen-add" class="screen">
+    <div class="card">
+      <h2>🏗️ Add a Feature</h2>
+      <div class="feature-grid" id="feature-grid"><!-- filled by JS --></div>
+      <hr class="divider">
+      <button class="btn" onclick="showScreen('screen-menu')">← Back to menu</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ FEATURE RESULT ════════════════ -->
+  <div id="screen-feat-result" class="screen">
+    <div class="card">
+      <h2 id="feat-res-title">✅ Feature Added</h2>
+      <div class="msg-box success" id="feat-res-body"></div>
+      <button class="btn primary" onclick="showScreen('screen-menu'); updateMenu()">Continue</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ EXPLORE RESULT ════════════════ -->
+  <div id="screen-explore" class="screen">
+    <div class="card">
+      <h2>🗺️ Exploring <span id="explore-world-name"></span></h2>
+      <div class="msg-box info" id="explore-body"></div>
+      <button class="btn primary" onclick="showScreen('screen-menu')">Continue</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TIME PASS RESULT ══════════════ -->
+  <div id="screen-time" class="screen">
+    <div class="card">
+      <h2>⏳ Time Passes…</h2>
+      <div class="msg-box warn" id="time-body"></div>
+      <button class="btn primary" onclick="showScreen('screen-menu'); updateMenu()">Continue</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ STATISTICS ════════════════════ -->
+  <div id="screen-stats" class="screen">
+    <div class="card">
+      <h2>📊 World Statistics</h2>
+      <div id="stats-body"></div>
+      <button class="btn" onclick="showScreen('screen-menu')">← Back</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ HISTORY ════════════════════════ -->
+  <div id="screen-history" class="screen">
+    <div class="card">
+      <h2>📜 World History</h2>
+      <ul id="history-list"><!-- filled by JS --></ul>
+      <hr class="divider">
+      <button class="btn" onclick="showScreen('screen-menu')">← Back</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ FAREWELL ═══════════════════════ -->
+  <div id="screen-farewell" class="screen">
+    <div class="card" style="text-align:center">
+      <div class="farewell-art">🌍</div>
+      <h1>Farewell!</h1>
+      <p style="margin:16px 0;color:var(--muted)" id="farewell-msg"></p>
+      <button class="btn primary" onclick="location.reload()">🔄 Play Again</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   GAME STATE
+══════════════════════════════════════════════════════════ */
+const MAX_FEATURES = 20;
+const MAX_LOG      = 50;
+
+const FEATURES = [
+  { emoji: "🌲", name: "Forest",         bonus: "+pop, +5 magic",  popMin: 50,  popMax: 200, magicBonus: 5  },
+  { emoji: "⛰️",  name: "Mountain",       bonus: "+3 magic",        popMin: 0,   popMax: 0,   magicBonus: 3  },
+  { emoji: "🌊", name: "Ocean",           bonus: "+pop, +7 magic",  popMin: 100, popMax: 500, magicBonus: 7  },
+  { emoji: "🏜️",  name: "Desert",         bonus: "flavour only",    popMin: 0,   popMax: 0,   magicBonus: 0  },
+  { emoji: "🏙️",  name: "City",           bonus: "+big pop",        popMin:1000, popMax:5000, magicBonus: 0  },
+  { emoji: "🌋", name: "Volcano",         bonus: "+15 magic",       popMin: 0,   popMax: 0,   magicBonus: 15 },
+  { emoji: "✨", name: "Magical Forest",  bonus: "+pop, +20 magic", popMin: 10,  popMax: 100, magicBonus: 20 },
+  { emoji: "❄️",  name: "Tundra",         bonus: "+4 magic",        popMin: 0,   popMax: 0,   magicBonus: 4  },
+];
+
+const FEATURE_DESC = [
+  "A lush green forest full of ancient trees and hidden creatures.",
+  "A towering mountain range that touches the clouds.",
+  "A vast, shimmering ocean teeming with sea life.",
+  "A golden desert of endless sand dunes and scorching sun.",
+  "A bustling city with tall towers and busy streets.",
+  "A roaring volcano that lights up the night sky.",
+  "An enchanted forest glowing with magical light.",
+  "A frozen tundra where snowflakes never melt.",
+];
+
+const EXPLORE_EVENTS = [
+  "You discover a hidden treasure chest! 💰",
+  "A friendly dragon waves hello! 🐉",
+  "You find a mysterious ancient ruin. 🏛️",
+  "A shooting star crosses the sky! 🌠",
+  "You meet a wise old wizard. 🧙",
+  "Butterflies dance around you. 🦋",
+  "You hear distant music from nowhere. 🎵",
+  "A rainbow appears after a light rain. 🌈",
+];
+
+const TIME_EVENTS = [
+  { text: "⚡ A great storm swept through the land!", popDelta: 0, magicDelta: 0 },
+  { text: "🌸 A season of great harvest blessed the people!", popDelta: 50, magicDelta: 0 },
+  { text: "🔮 A surge of magic energy filled the air! (+5 magic)", popDelta: 0, magicDelta: 5 },
+  { text: "🌞 Decades of peace and prosperity followed!", popDelta: 200, magicDelta: 0 },
+  { text: "🌑 A mysterious eclipse darkened the skies…", popDelta: 0, magicDelta: 0 },
+];
+
+let world = null;
+
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════ */
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function addLog(msg) {
+  if (world.log.length < MAX_LOG) world.log.push(msg);
+}
+
+function clamp100(v) { return Math.min(100, Math.max(0, v)); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function fmt(n) { return n.toLocaleString(); }
+
+/* ══════════════════════════════════════════════════════════
+   SETUP
+══════════════════════════════════════════════════════════ */
+function startGame() {
+  const worldName   = document.getElementById('inp-world').value.trim()   || 'Unnamed World';
+  const creatorName = document.getElementById('inp-creator').value.trim() || 'Anonymous';
+
+  world = {
+    name:     worldName,
+    creator:  creatorName,
+    age:      0,
+    features: [],   // array of feature indices
+    pop:      0,
+    magic:    rnd(10, 39),
+    log:      [],
+  };
+
+  addLog(`World "${world.name}" created by ${world.creator}.`);
+
+  buildFeatureGrid();
+  updateMenu();
+  showScreen('screen-menu');
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN MENU
+══════════════════════════════════════════════════════════ */
+function updateMenu() {
+  document.getElementById('hdr-name').textContent   = world.name;
+  document.getElementById('stat-age').textContent   = fmt(world.age);
+  document.getElementById('stat-pop').textContent   = fmt(world.pop);
+  document.getElementById('stat-magic').textContent = world.magic + '/100';
+  document.getElementById('stat-feats').textContent = world.features.length + '/' + MAX_FEATURES;
+  document.getElementById('magic-bar').style.width  = world.magic + '%';
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADD FEATURE
+══════════════════════════════════════════════════════════ */
+function buildFeatureGrid() {
+  const grid = document.getElementById('feature-grid');
+  grid.innerHTML = '';
+  FEATURES.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'feature-card';
+    div.innerHTML = `<div class="feat-name">${f.emoji} ${f.name}</div>
+                     <div class="feat-bonus">${f.bonus}</div>`;
+    div.onclick = () => pickFeature(i);
+    grid.appendChild(div);
+  });
+}
+
+function pickFeature(idx) {
+  if (world.features.length >= MAX_FEATURES) {
+    showFeatureResult('⚠️ World Full',
+      `<b>Your world already has ${MAX_FEATURES} features</b> — the maximum allowed. No more can be added.`, 'warn');
+    return;
+  }
+
+  world.features.push(idx);
+  const f = FEATURES[idx];
+  let popGained = 0;
+  let magicGained = f.magicBonus;
+
+  if (f.popMax > 0) popGained = rnd(f.popMin, f.popMax);
+  world.pop  += popGained;
+  world.magic = clamp100(world.magic + magicGained);
+
+  addLog(`Added ${f.emoji} ${f.name} to the world.`);
+  updateMenu();
+
+  let detail = `<b>${f.emoji} ${f.name}</b> has been added to ${world.name}!<br><br>
+    <i>${FEATURE_DESC[idx]}</i>`;
+  if (popGained > 0) detail += `<br><br>👥 Population +${fmt(popGained)} → now ${fmt(world.pop)}`;
+  if (magicGained > 0) detail += `<br>🔮 Magic +${magicGained} → now ${world.magic}/100`;
+
+  showFeatureResult('✅ Feature Added', detail, 'success');
+}
+
+function showFeatureResult(title, html, cls) {
+  document.getElementById('feat-res-title').textContent = title;
+  const box = document.getElementById('feat-res-body');
+  box.className = 'msg-box ' + cls;
+  box.innerHTML = html;
+  showScreen('screen-feat-result');
+}
+
+/* ══════════════════════════════════════════════════════════
+   EXPLORE
+══════════════════════════════════════════════════════════ */
+function doExplore() {
+  document.getElementById('explore-world-name').textContent = world.name;
+
+  if (world.features.length === 0) {
+    document.getElementById('explore-body').innerHTML =
+      '🌑 Your world is empty. Add some features first!';
+    showScreen('screen-explore');
+    return;
+  }
+
+  const featIdx = world.features[rnd(0, world.features.length - 1)];
+  const f       = FEATURES[featIdx];
+  const event   = EXPLORE_EVENTS[rnd(0, EXPLORE_EVENTS.length - 1)];
+
+  document.getElementById('explore-body').innerHTML =
+    `You venture into the <b>${f.emoji} ${f.name}</b>…<br><br>
+     <i>${FEATURE_DESC[featIdx]}</i><br><br>
+     🎲 <b>Random Event:</b> ${event}`;
+
+  showScreen('screen-explore');
+}
+
+/* ══════════════════════════════════════════════════════════
+   PASS TIME
+══════════════════════════════════════════════════════════ */
+function doPassTime() {
+  const years  = rnd(1, 100);
+  world.age   += years;
+
+  let html = `⏩ <b>${years} year(s)</b> pass in ${world.name}…<br><br>`;
+
+  if (world.pop > 0) {
+    const growth   = Math.floor(world.pop * 0.1 * (years / 10));
+    world.pop     += growth;
+    html += `📈 Population grew by <b>${fmt(growth)}</b> — now <b>${fmt(world.pop)}</b> beings.<br>`;
+  } else {
+    html += `🌑 The world is quiet and empty…<br>`;
+  }
+
+  const ev = TIME_EVENTS[rnd(0, TIME_EVENTS.length - 1)];
+  world.pop   = Math.max(0, world.pop + ev.popDelta);
+  world.magic = clamp100(world.magic + ev.magicDelta);
+
+  html += `<br>${ev.text}`;
+  if (ev.popDelta > 0)   html += `<br>👥 +${ev.popDelta} people`;
+  if (ev.magicDelta > 0) html += `<br>🔮 Magic now ${world.magic}/100`;
+
+  addLog(`${years} year(s) passed. World age: ${world.age}.`);
+  updateMenu();
+
+  document.getElementById('time-body').innerHTML = html;
+  showScreen('screen-time');
+}
+
+/* ══════════════════════════════════════════════════════════
+   STATISTICS
+══════════════════════════════════════════════════════════ */
+function showStats() {
+  let magicLabel = 'Almost Mundane';
+  if      (world.magic >= 80) magicLabel = 'Ancient & Mighty! ✨';
+  else if (world.magic >= 50) magicLabel = 'Quite Magical 🌟';
+  else if (world.magic >= 20) magicLabel = 'A Touch of Magic 🔮';
+
+  let featHTML = world.features.length === 0
+    ? '<p style="color:var(--muted)">(No features yet — go build something!)</p>'
+    : `<div class="feat-tags">${world.features.map(i =>
+        `<span class="feat-tag">${FEATURES[i].emoji} ${FEATURES[i].name}</span>`
+      ).join('')}</div>`;
+
+  document.getElementById('stats-body').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:.92rem">
+      <tr><td style="padding:6px 0;color:var(--muted)">🌍 World Name</td><td style="padding:6px 0;font-weight:600">${world.name}</td></tr>
+      <tr><td style="padding:6px 0;color:var(--muted)">👑 Creator</td><td style="padding:6px 0">${world.creator}</td></tr>
+      <tr><td style="padding:6px 0;color:var(--muted)">📅 Age</td><td style="padding:6px 0">${fmt(world.age)} year(s)</td></tr>
+      <tr><td style="padding:6px 0;color:var(--muted)">👥 Population</td><td style="padding:6px 0">${fmt(world.pop)} beings</td></tr>
+      <tr><td style="padding:6px 0;color:var(--muted)">🔮 Magic Level</td><td style="padding:6px 0">${world.magic}/100 — ${magicLabel}</td></tr>
+      <tr><td style="padding:6px 0;color:var(--muted)">🗺️ Features</td><td style="padding:6px 0">${world.features.length} / ${MAX_FEATURES}</td></tr>
+    </table>
+    <hr class="divider">
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:8px">Lands in your world:</p>
+    ${featHTML}
+  `;
+  showScreen('screen-stats');
+}
+
+/* ══════════════════════════════════════════════════════════
+   HISTORY
+══════════════════════════════════════════════════════════ */
+function showHistory() {
+  const ul = document.getElementById('history-list');
+  if (world.log.length === 0) {
+    ul.innerHTML = '<li><span style="color:var(--muted)">No history yet.</span></li>';
+  } else {
+    ul.innerHTML = world.log.map((entry, i) =>
+      `<li><span class="log-idx">[${String(i + 1).padStart(2, '\u00a0')}]</span> ${entry}</li>`
+    ).join('');
+  }
+  showScreen('screen-history');
+}
+
+/* ══════════════════════════════════════════════════════════
+   EXIT
+══════════════════════════════════════════════════════════ */
+function doExit() {
+  document.getElementById('farewell-msg').innerHTML =
+    `Farewell, <b>${world.creator}</b>!<br>
+     Your world <b>"${world.name}"</b> will live on forever.<br><br>
+     Age reached: <b>${fmt(world.age)} years</b> &nbsp;|&nbsp;
+     Population: <b>${fmt(world.pop)}</b> &nbsp;|&nbsp;
+     Magic: <b>${world.magic}/100</b><br><br>
+     Thank you for playing World Builder! 🌍`;
+  showScreen('screen-farewell');
+}
+
+/* ══════════════════════════════════════════════════════════
+   WIRE UP NAVIGATION BUTTONS that need data refresh
+══════════════════════════════════════════════════════════ */
+document.querySelector('[onclick="showScreen(\'screen-stats\')"]')
+  .setAttribute('onclick', 'showStats()');
+
+document.querySelector('[onclick="showScreen(\'screen-history\')"]')
+  .setAttribute('onclick', 'showHistory()');
+</script>
+</body>
+</html>
