@@ -121,8 +121,7 @@ static void createWorld(World *w) {
     w->creator[strcspn(w->creator, "\n")] = '\0';
     if (w->creator[0] == '\0') strcpy(w->creator, "Anonymous");
 
-    /* Randomise starting stats */
-    srand((unsigned int)time(NULL));
+    /* Initialise starting stats */
     w->age        = 0;
     w->featureCount = 0;
     w->population = 0;
@@ -229,7 +228,6 @@ static void exploreWorld(const World *w) {
     }
 
     /* Pick a random feature to "visit" */
-    srand((unsigned int)time(NULL));
     int idx = rand() % w->featureCount;
     FeatureType ft = w->features[idx];
 
@@ -307,7 +305,6 @@ static void passTime(World *w) {
     }
 
     /* Random world event */
-    srand((unsigned int)time(NULL) + w->age);
     int event = rand() % 5;
     switch (event) {
         case 0:
@@ -384,6 +381,8 @@ static int mainMenu(const World *w) {
 int main(void) {
     World world;
     memset(&world, 0, sizeof(world));
+
+    srand((unsigned int)time(NULL));   /* seed RNG once at startup */
 
     printBanner();
     printf("\n  Press ENTER to start building your world...");
