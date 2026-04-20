@@ -65,7 +65,7 @@ const SPECIAL = Object.freeze({
 //
 // Encoding: integer 0-5 → colour index, null → empty cell
 //
-// Rows are top-to-bottom.  Odd-indexed rows (0-based) are offset by R.
+// Rows are top-to-bottom.  Rows with odd indices (1, 3, 5…) are offset right by R.
 // Row length alternates COLS_ODD / COLS_EVEN.
 
 const LEVELS = [

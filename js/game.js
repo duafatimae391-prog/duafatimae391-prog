@@ -23,7 +23,7 @@ const DIA = R * 2;
 const ROW_H = R * Math.sqrt(3);  // vertical spacing between row centres
 
 function colX(row, col) {
-  const offset = (row % 2 === 1) ? R : 0; // even rows (0-idx) no offset; odd rows shift right
+  const offset = (row % 2 === 1) ? R : 0; // even indices (0,2,4…) have no offset; odd indices (1,3,5…) shift right by R
   return R + col * DIA + offset;
 }
 
@@ -901,7 +901,8 @@ const Game = (() => {
   }
 
   function drawAimLine() {
-    if (pointerDown || true) {
+    // Aim line is always visible so the player can see where they're aiming
+    {
       ctx.save();
       ctx.strokeStyle = 'rgba(255,255,255,0.25)';
       ctx.lineWidth   = 2;
