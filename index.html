@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="Bubble Pop Blast! - A fun bubble shooter game for all ages!">
+  <title>Bubble Pop Blast! 🫧</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── LOADING SCREEN ──────────────────────────────────────────────── -->
+  <div id="screen-loading" class="screen active">
+    <div class="loading-content">
+      <div class="bubble-logo">🫧</div>
+      <h1>Bubble Pop Blast!</h1>
+      <div class="loading-bar-wrapper">
+        <div class="loading-bar" id="loading-bar"></div>
+      </div>
+      <p class="loading-text" id="loading-text">Loading…</p>
+    </div>
+  </div>
+
+  <!-- ── MAIN MENU SCREEN ───────────────────────────────────────────── -->
+  <div id="screen-menu" class="screen">
+    <div class="floating-bubbles" id="menu-bubbles"></div>
+    <div class="menu-content">
+      <div class="bubble-logo-big">🫧</div>
+      <h1 class="game-title">Bubble Pop<br><span class="title-accent">Blast!</span></h1>
+
+      <div class="menu-stats-row">
+        <div class="stat-chip">
+          <span class="stat-icon">🏆</span>
+          <div>
+            <div class="stat-label">Best</div>
+            <div class="stat-val" id="menu-highscore">0</div>
+          </div>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-icon">💰</span>
+          <div>
+            <div class="stat-label">Coins</div>
+            <div class="stat-val" id="menu-coins">0</div>
+          </div>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-icon">⭐</span>
+          <div>
+            <div class="stat-label">Level</div>
+            <div class="stat-val" id="menu-level">1</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-play" id="btn-play">▶ PLAY</button>
+
+      <div class="menu-icon-row">
+        <button class="btn-icon-circle" id="btn-shop"        title="Shop">🛒</button>
+        <button class="btn-icon-circle" id="btn-sound"       title="Sound">🔊</button>
+        <button class="btn-icon-circle" id="btn-leaderboard" title="Leaderboard">🏆</button>
+        <button class="btn-icon-circle" id="btn-how-to-play" title="How to Play">❓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SHOP SCREEN ────────────────────────────────────────────────── -->
+  <div id="screen-shop" class="screen">
+    <div class="top-bar">
+      <button class="btn-back" id="shop-back">← Back</button>
+      <h2>🛒 Shop</h2>
+      <div class="coins-pill">💰 <span id="shop-coins">0</span></div>
+    </div>
+    <div class="shop-grid">
+      <div class="shop-card">
+        <div class="shop-card-icon">💣</div>
+        <div class="shop-card-name">Bomb Bubble</div>
+        <div class="shop-card-desc">Pops all neighbouring bubbles instantly!</div>
+        <div class="shop-card-owned">Owned: <span id="bomb-count">0</span></div>
+        <button class="btn-buy" data-item="bomb" data-cost="50">Buy · 50 💰</button>
+      </div>
+      <div class="shop-card">
+        <div class="shop-card-icon">🌈</div>
+        <div class="shop-card-name">Rainbow Bubble</div>
+        <div class="shop-card-desc">Matches any colour on the grid!</div>
+        <div class="shop-card-owned">Owned: <span id="rainbow-count">0</span></div>
+        <button class="btn-buy" data-item="rainbow" data-cost="75">Buy · 75 💰</button>
+      </div>
+      <div class="shop-card">
+        <div class="shop-card-icon">❤️</div>
+        <div class="shop-card-name">Extra Life</div>
+        <div class="shop-card-desc">Replenish one life during play!</div>
+        <div class="shop-card-owned">Owned: <span id="life-count">0</span></div>
+        <button class="btn-buy" data-item="life" data-cost="100">Buy · 100 💰</button>
+      </div>
+      <div class="shop-card">
+        <div class="shop-card-icon">❄️</div>
+        <div class="shop-card-name">Freeze</div>
+        <div class="shop-card-desc">Stops bubbles descending for 10 s!</div>
+        <div class="shop-card-owned">Owned: <span id="freeze-count">0</span></div>
+        <button class="btn-buy" data-item="freeze" data-cost="60">Buy · 60 💰</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HOW TO PLAY SCREEN ─────────────────────────────────────────── -->
+  <div id="screen-howto" class="screen overlay">
+    <div class="modal howto-modal">
+      <button class="btn-close" id="howto-close">✕</button>
+      <h2>❓ How to Play</h2>
+      <ul class="howto-list">
+        <li>🎯 Aim and click (or tap) to shoot bubbles.</li>
+        <li>🔗 Match <strong>3 or more</strong> bubbles of the same colour to pop them.</li>
+        <li>💰 Earn <strong>coins</strong> for popped bubbles and level clears.</li>
+        <li>💥 Floating bubbles <strong>fall</strong> after a match — bonus points!</li>
+        <li>❤️ You have <strong>3 lives</strong>. Lose one each time bubbles reach the danger line.</li>
+        <li>🏆 Beat all 10 levels to become the Bubble Champion!</li>
+        <li>🛒 Use coins in the <strong>Shop</strong> for power-ups.</li>
+      </ul>
+      <button class="btn-modal" id="howto-ok">Got it! 👍</button>
+    </div>
+  </div>
+
+  <!-- ── GAME SCREEN ────────────────────────────────────────────────── -->
+  <div id="screen-game" class="screen">
+    <div class="game-hud">
+      <div class="hud-left">
+        <button class="btn-hud" id="btn-pause" title="Pause">⏸</button>
+        <div class="hud-level">LVL <span id="hud-level">1</span></div>
+      </div>
+      <div class="hud-center">
+        <div class="hud-score-label">SCORE</div>
+        <div class="hud-score" id="hud-score">0</div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-coins">💰 <span id="hud-coins">0</span></div>
+        <div class="hud-lives" id="hud-lives">❤️❤️❤️</div>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+    </div>
+
+    <div class="game-bottom-bar">
+      <div class="powerup-row">
+        <button class="btn-powerup" id="btn-use-bomb"    title="Use Bomb (💣)">💣<span class="pu-count" id="pu-bomb">0</span></button>
+        <button class="btn-powerup" id="btn-use-rainbow" title="Use Rainbow (🌈)">🌈<span class="pu-count" id="pu-rainbow">0</span></button>
+        <button class="btn-powerup" id="btn-use-freeze"  title="Use Freeze (❄️)">❄️<span class="pu-count" id="pu-freeze">0</span></button>
+        <button class="btn-powerup" id="btn-use-life"    title="Use Life (❤️)">❤️<span class="pu-count" id="pu-life">0</span></button>
+      </div>
+      <div class="next-bubble-wrap">
+        <span class="next-label">NEXT</span>
+        <canvas id="next-canvas" width="36" height="36"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAUSE OVERLAY ─────────────────────────────────────────────── -->
+  <div id="screen-pause" class="screen overlay">
+    <div class="modal">
+      <h2>⏸ Paused</h2>
+      <div class="modal-info">Score: <strong id="pause-score">0</strong></div>
+      <button class="btn-modal" id="btn-resume">▶ Resume</button>
+      <button class="btn-modal" id="btn-restart">🔄 Restart Level</button>
+      <button class="btn-modal btn-secondary" id="btn-quit">🏠 Main Menu</button>
+    </div>
+  </div>
+
+  <!-- ── WIN OVERLAY ───────────────────────────────────────────────── -->
+  <div id="screen-win" class="screen overlay">
+    <div class="modal win-modal">
+      <div class="star-row" id="win-stars">⭐⭐⭐</div>
+      <h2>🎉 Level Complete!</h2>
+      <div class="result-grid">
+        <div class="result-cell"><span class="result-label">Score</span><span class="result-val" id="win-score">0</span></div>
+        <div class="result-cell"><span class="result-label">Coins Earned</span><span class="result-val" id="win-coins">+0 💰</span></div>
+        <div class="result-cell"><span class="result-label">Level</span><span class="result-val" id="win-level">1</span></div>
+        <div class="result-cell"><span class="result-label">Best Score</span><span class="result-val" id="win-best">0</span></div>
+      </div>
+      <button class="btn-modal btn-next" id="btn-next-level">Next Level ▶</button>
+      <button class="btn-modal btn-secondary" id="btn-win-menu">🏠 Menu</button>
+    </div>
+  </div>
+
+  <!-- ── GAME OVER OVERLAY ─────────────────────────────────────────── -->
+  <div id="screen-gameover" class="screen overlay">
+    <div class="modal gameover-modal">
+      <div class="gameover-emoji">💔</div>
+      <h2>Game Over!</h2>
+      <div class="result-grid">
+        <div class="result-cell"><span class="result-label">Score</span><span class="result-val" id="go-score">0</span></div>
+        <div class="result-cell"><span class="result-label">Best Score</span><span class="result-val" id="go-best">0</span></div>
+      </div>
+      <button class="btn-modal" id="btn-try-again">🔄 Try Again</button>
+      <button class="btn-modal btn-secondary" id="btn-go-menu">🏠 Menu</button>
+    </div>
+  </div>
+
+  <!-- ── LEADERBOARD OVERLAY ───────────────────────────────────────── -->
+  <div id="screen-leaderboard" class="screen overlay">
+    <div class="modal">
+      <button class="btn-close" id="lb-close">✕</button>
+      <h2>🏆 Top Scores</h2>
+      <ol class="leaderboard-list" id="leaderboard-list"></ol>
+      <button class="btn-modal btn-secondary" id="lb-clear">🗑 Clear Scores</button>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
